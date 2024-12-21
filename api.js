@@ -31,4 +31,8 @@ app.post('/api/cv', async (req, res) => {
   }
 });
 
+app.get('/api/cv', (req, res) => {
+  res.send('Hello from Netlify!');
+});
+
 module.exports.handler = serverless(app);
