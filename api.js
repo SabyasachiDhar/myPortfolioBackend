@@ -1,9 +1,34 @@
 const express = require('express');
 const serverless = require('serverless-http');
-const app = express();
+const cors = require('cors');
+const mongoose = require('mongoose');
 
-app.get('/api/cv', (req, res) => {
-  res.send('Hello from Netlify!');
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+mongoose.connect('mongodb://localhost:27017/mycvdatabase')
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+  });
+
+const cvSchema = new mongoose.Schema({
+  name: String
 });
 
-module.exports = serverless(app);
+const CV = mongoose.model('CV', cvSchema);
+
+app.post('/api/cv', async (req, res) => {
+  try {
+    const newCV = new CV(req.body);
+    const savedCV = await newCV.save();
+    res.status(200).send(savedCV);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+module.exports.handler = serverless(app);
